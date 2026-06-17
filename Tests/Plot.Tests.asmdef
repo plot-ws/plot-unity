@@ -1,0 +1,7 @@
+{
+  "name": "Plot.Tests",
+  "rootNamespace": "Plot.Tests",
+  "references": ["Plot", "UnityEditor.TestRunner", "UnityEngine.TestRunner"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "includePlatforms": ["Editor"]
+}
