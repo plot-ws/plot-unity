@@ -1,0 +1,9 @@
+{
+  "name": "dev.plot.client",
+  "displayName": "Plot Client",
+  "version": "0.0.0",
+  "unity": "2022.3",
+  "description": "Plot multiplayer SDK for Unity.",
+  "keywords": ["multiplayer", "networking"],
+  "author": { "name": "Plot" }
+}
