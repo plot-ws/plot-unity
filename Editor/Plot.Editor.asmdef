@@ -1,0 +1,10 @@
+{
+  "name": "Plot.Editor",
+  "rootNamespace": "Plot.Editor",
+  "references": ["Plot"],
+  "includePlatforms": ["Editor"],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "autoReferenced": true
+}
