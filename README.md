@@ -31,6 +31,50 @@ room.OnPlayerLeft += e => Debug.Log($"left: {e.PlayerId}");
 room.Send(new { hello = "world" });
 ```
 
+## Interpolation (v1f)
+
+Smoothly render remote state by interpolating between server snapshots:
+
+```csharp
+// Interpolate every player's position (a vec2) at a 100ms render delay.
+room.Interpolate("players.*.position", "vec2", renderDelay: 100);
+room.OnFrame += frame => {
+    foreach (var kv in frame.Interpolated)
+        RenderAt(kv.Key, kv.Value); // kv.Key e.g. "players.<id>.position"
+};
+
+// Drive the frame loop from MonoBehaviour.Update():
+void Update() => room.TickFrame();
+// ...or run a background timer if you are off the Unity main thread:
+room.StartFrameLoop(intervalMs: 16);
+
+// Grow the render delay on jittery connections (clamped by maxExtraMs):
+room.SetAdaptiveSmoothing(enabled: true, gain: 1.0, maxExtraMs: 100.0);
+```
+
+Supported types: `"number"`, `"vec2"`, `"vec3"`, `"quat"`. Paths support a
+single-level `*` wildcard.
+
+## Client-side prediction (v1g)
+
+Apply local inputs immediately and reconcile against the server's
+authoritative state. The engine cannot run your server handler, so you supply
+a deterministic predict function `(state, input, player) => nextState`:
+
+```csharp
+room.AttachPrediction(initialState, (state, input, player) =>
+    Reduce(state, input, player)); // same logic your server handler runs
+
+// Smooth reconciliation drift on a predicted path over ~100ms:
+room.Predict("players.me.position", "vec2", correctionMs: 100);
+
+room.OnPredicted += e => Render(e.State); // on local apply AND on reconcile
+room.SendPredicted(new { move = "left" }); // optimistic; carries _seq upstream
+
+// Read the corrected (predicted + smoothed) value each frame:
+var pos = room.CorrectedState["players.me.position"];
+```
+
 ## Protocol
 
 This SDK speaks `X-Plot-Protocol: v1b.0`. Wire-format types live under
