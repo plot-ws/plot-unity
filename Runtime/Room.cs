@@ -120,6 +120,39 @@ namespace Plot
         }
 
         /// <summary>
+        /// Sample the interpolated value at a single path at an arbitrary past
+        /// server timestamp — the rendering-side analogue of the server's
+        /// <c>ctx.rewindTo</c>. Reuses the same SnapshotBuffer + lerp + wildcard
+        /// path resolver the live frame loop uses, but is a pure read: it does
+        /// not touch the frame loop or any prediction/correction state.
+        ///
+        /// <paramref name="atServerTs"/> is in the server time domain (same as
+        /// snapshot timestamps); convert a client time with
+        /// <c>clientNow - ServerClockOffset</c>. Returns the interpolated leaf
+        /// value for a plain path, a <c>Dictionary&lt;string, object?&gt;</c>
+        /// keyed by resolved path for a <c>*</c> wildcard, or <c>null</c> when
+        /// the timestamp falls outside the buffer's retained horizon.
+        /// </summary>
+        public object? SampleAt(string path, string type, long atServerTs)
+        {
+            return Sampler.SampleAt(_buffer, path, ParseType(type), atServerTs);
+        }
+
+        /// <summary>
+        /// Bind a <see cref="Rewind"/> handle to a fixed past server timestamp
+        /// so callers can read several paths at one frozen time ergonomically.
+        /// Thin wrapper over the same buffer lookup + lerp as
+        /// <see cref="SampleAt"/>.
+        /// </summary>
+        public Rewind RewindTo(long atServerTs)
+        {
+            return new Rewind(_buffer, atServerTs);
+        }
+
+        /// <summary>Current median client→server clock offset (clientNow − serverTs).</summary>
+        public double ServerClockOffset => _clock.Offset;
+
+        /// <summary>
         /// Adaptive smoothing: when enabled, the render delay grows with measured
         /// connection jitter so a bursty link buffers more and a steady link
         /// stays responsive. Effective extra delay =

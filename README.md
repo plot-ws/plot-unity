@@ -55,6 +55,30 @@ room.SetAdaptiveSmoothing(enabled: true, gain: 1.0, maxExtraMs: 100.0);
 Supported types: `"number"`, `"vec2"`, `"vec3"`, `"quat"`. Paths support a
 single-level `*` wildcard.
 
+### Rewind / point sampling
+
+Sample interpolated state at an arbitrary past server time — the rendering-side
+analogue of the server's `ctx.rewindTo` (e.g. client-side hit detection). Pure
+read: it never touches the frame loop or correction state.
+
+```csharp
+// atServerTs is in the server time domain; convert a client time with
+// NowMs() - room.ServerClockOffset.
+long past = (long)(now - room.ServerClockOffset - 120); // 120ms ago
+
+// One path: returns the interpolated value (a {x,y} map for vec2), or null
+// when `past` is outside the buffer's retained horizon.
+var p1 = room.SampleAt("players.p1.position", "vec2", past);
+
+// Wildcard: a Dictionary<string, object?> keyed by resolved path, or null.
+var all = room.SampleAt("players.*.position", "vec2", past);
+
+// Bind once, read many paths at the same frozen instant:
+var r = room.RewindTo(past);
+var shooter = r.Sample("players.p1.position", "vec2");
+var target = r.Sample("players.p2.position", "vec2");
+```
+
 ## Client-side prediction (v1g)
 
 Apply local inputs immediately and reconcile against the server's
