@@ -9,7 +9,7 @@ In `Packages/manifest.json`:
 ```json
 {
   "dependencies": {
-    "dev.plot.client": "https://github.com/plot-ws/plot.git?path=/sdks/unity"
+    "dev.plot.client": "https://github.com/plot-ws/plot-unity.git"
   }
 }
 ```
