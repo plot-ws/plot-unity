@@ -119,3 +119,8 @@ from `packages/protocol/codegen/`.
 
 Edit-mode tests under `Tests/`. Run from `Window → General → Test Runner`
 in the Editor, or via `game-ci/unity-test-runner` in CI.
+
+## Full documentation
+
+This README is the quickstart. For concepts, guides, and the server handler
+reference, see the full docs: **https://docs.plot.ws/sdks/unity**
